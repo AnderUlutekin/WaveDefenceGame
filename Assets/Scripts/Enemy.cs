@@ -10,6 +10,8 @@ public class Enemy : MonoBehaviour
 
     private int waypointIndex = 0;
 
+    public Animator anim;
+
     private void Awake()
     {
         waypoints = new List<Transform>();
@@ -32,11 +34,14 @@ public class Enemy : MonoBehaviour
         {
             waypoints.Add(child);
         }
+
+        anim = GetComponentInChildren<Animator>();
     }
 
     void Start()
     {
         transform.position = waypoints[waypointIndex].transform.position;
+        anim.SetBool("isWalking", true);
     }
 
     void Update()
@@ -53,9 +58,15 @@ public class Enemy : MonoBehaviour
                 waypoints[waypointIndex].transform.position,
                 moveSpeed * Time.deltaTime);
 
+            transform.LookAt(waypoints[waypointIndex].transform);
+
             if (transform.position == waypoints[waypointIndex].transform.position)
             {
                 waypointIndex += 1;
+                if (waypointIndex == waypoints.Count)
+                {
+                    anim.SetBool("isWalking", false);
+                }
             }
         }
     }
