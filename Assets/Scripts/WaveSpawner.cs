@@ -4,21 +4,20 @@ using UnityEngine;
 
 public class WaveSpawner : MonoBehaviour
 {
-    [SerializeField]
-    private Wave[] waves;
+    public Wave[] waves;
 
     [SerializeField]
     private Transform spawnPoint;
 
-    [SerializeField]
-    private int currentWaveIndex = 0;
+    public int currentWaveIndex = 0;
 
-    [SerializeField]
-    private bool isWaveOngoing = false;
+    public bool isWaveOngoing = false;
 
-    void Start()
+    private GameController gameController;
+
+    private void Awake()
     {
-        
+        gameController = FindObjectOfType<GameController>();
     }
 
     void Update()
@@ -34,11 +33,16 @@ public class WaveSpawner : MonoBehaviour
     {
         for (int i = 0; i < waves[currentWaveIndex].enemies.Length; i++)
         {
-            Instantiate(waves[currentWaveIndex].enemies[i], spawnPoint);
+            Enemy newEnemy = Instantiate(waves[currentWaveIndex].enemies[i], spawnPoint);
+            gameController.AddEnemy(newEnemy);
+            gameController.waveHasStarted = true;
+            if (gameController.gameHasStarted == false)
+            {
+                gameController.gameHasStarted = true;
+            }
 
             yield return new WaitForSeconds(waves[currentWaveIndex].timeToNextEnemy);
         }
-        currentWaveIndex += 1;
     }
 }
 

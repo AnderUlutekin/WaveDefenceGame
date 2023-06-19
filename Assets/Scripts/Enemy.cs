@@ -5,12 +5,20 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     private List<Transform> waypoints;
+    private GameController gameController;
 
+    [SerializeField]
+    private FloatingHealthBar healthBar;
+    [SerializeField]
+    private float health;
+    [SerializeField]
+    private float maxHealth;
+    [SerializeField]
     private float moveSpeed;
 
     private int waypointIndex = 0;
 
-    public Animator anim;
+    private Animator anim;
 
     private void Awake()
     {
@@ -20,10 +28,14 @@ public class Enemy : MonoBehaviour
         if (gameObject.tag == "EnemyBig") {
             spawnpoint = GameObject.Find("spawnBig").transform;
             moveSpeed = 4f;
+            health = 10f;
+            maxHealth = 10f;
         }
         else {
             spawnpoint = GameObject.Find("spawnSmall").transform;
             moveSpeed = 5f;
+            health = 6f;
+            maxHealth = 6f;
         }
 
         waypoints.Add(spawnpoint);
@@ -36,12 +48,15 @@ public class Enemy : MonoBehaviour
         }
 
         anim = GetComponentInChildren<Animator>();
+        gameController = FindObjectOfType<GameController>();
     }
 
     void Start()
     {
         transform.position = waypoints[waypointIndex].transform.position;
         anim.SetBool("isWalking", true);
+        health = maxHealth;
+        healthBar.UpdateHealthBar(health, maxHealth);
     }
 
     void Update()
@@ -69,5 +84,22 @@ public class Enemy : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void TakeDamage(float damageAmount)
+    {
+        health = health - damageAmount;
+        healthBar.UpdateHealthBar(health, maxHealth);
+        if (health <= 0)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        gameController.GetKillMoney(gameController.mobValue);
+        gameController.RemoveEnemy(gameObject.GetComponent<Enemy>());
+        Destroy(gameObject);
     }
 }
